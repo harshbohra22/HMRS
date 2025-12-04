@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ExternalLink, MapPin, Building2, DollarSign, Calendar, Loader2, AlertCircle } from 'lucide-react';
 import { externalJobsApi, type ExternalJob } from '../services/externalJobsApi';
 import { Card, CardBody } from './ui/Card';

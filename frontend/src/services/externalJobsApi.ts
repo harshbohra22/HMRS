@@ -36,8 +36,8 @@ export const externalJobsApi = {
     country: string = 'us',
     query: string = '',
     location: string = '',
-    resultsPerPage: number = 20,
-    page: number = 1
+    _resultsPerPage: number = 20,
+    _page: number = 1
   ): Promise<ExternalJobsResponse> => {
     try {
       const response = await api.get<ExternalJobsResponse>('/external-jobs', {
@@ -61,11 +61,11 @@ export const externalJobsApi = {
   getJobsByCategory: async (
     country: string = 'us',
     category: string,
-    resultsPerPage: number = 20,
-    page: number = 1
+    _resultsPerPage: number = 20,
+    _page: number = 1
   ): Promise<ExternalJobsResponse> => {
     // Fallback to search since backend doesn't support category specific endpoint yet
-    return externalJobsApi.searchJobs(country, category, '', resultsPerPage, page);
+    return externalJobsApi.searchJobs(country, category, '', _resultsPerPage, _page);
   }
 };
 
