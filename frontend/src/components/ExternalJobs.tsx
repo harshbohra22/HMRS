@@ -13,27 +13,8 @@ export const ExternalJobs: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
   const [country, setCountry] = useState('us');
-  const [hasApiKey, setHasApiKey] = useState(false);
-
-  useEffect(() => {
-    // Check if API keys are configured
-    const appId = import.meta.env.VITE_ADZUNA_APP_ID;
-    const appKey = import.meta.env.VITE_ADZUNA_APP_KEY;
-    const configured = !!(appId && appKey && appId !== 'your_app_id_here' && appKey !== 'your_app_key_here');
-    setHasApiKey(configured);
-
-    // Debug log (remove in production)
-    if (!configured) {
-      console.log('Adzuna API keys not configured:', { appId, appKey });
-    }
-  }, []);
 
   const handleSearch = async () => {
-    if (!hasApiKey) {
-      toast.error('Please configure Adzuna API keys in your .env file');
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
@@ -75,53 +56,6 @@ export const ExternalJobs: React.FC = () => {
     if (!max) return `From $${min.toLocaleString()}`;
     return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
   };
-
-  if (!hasApiKey) {
-    return (
-      <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
-        <CardBody>
-          <div className="flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
-            <div className="flex-1">
-              <h3 className="font-semibold text-yellow-900 dark:text-yellow-200 mb-2">
-                External Jobs API Not Configured
-              </h3>
-              <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-4">
-                <strong>Note:</strong> You don't need to register as a user on this site. You only need API keys from Adzuna (which are developer credentials, not user accounts).
-              </p>
-              <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-4">
-                To enable external job listings, you need to:
-              </p>
-              <ol className="list-decimal list-inside text-sm text-yellow-800 dark:text-yellow-300 space-y-1 mb-4">
-                <li>Get a free API key from{' '}
-                  <a
-                    href="https://developer.adzuna.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline font-medium"
-                  >
-                    Adzuna Developer Portal
-                  </a>
-                  {' '}(developer account, not a job seeker account)
-                </li>
-                <li>Create a <code className="bg-yellow-100 dark:bg-yellow-900/50 px-1 py-0.5 rounded">.env</code> file in the frontend directory</li>
-                <li>Add these variables:
-                  <pre className="bg-yellow-100 dark:bg-yellow-900/50 p-2 rounded mt-2 text-xs overflow-x-auto">
-                    {`VITE_ADZUNA_APP_ID=your_app_id
-VITE_ADZUNA_APP_KEY=your_app_key`}
-                  </pre>
-                </li>
-                <li>Restart the dev server (the server has been restarted, refresh your browser)</li>
-              </ol>
-              <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-4 p-2 bg-yellow-100 dark:bg-yellow-900/50 rounded">
-                💡 <strong>Tip:</strong> If you just added the .env file, make sure to refresh your browser page after restarting the server.
-              </p>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -211,12 +145,12 @@ VITE_ADZUNA_APP_KEY=your_app_key`}
                       <div className="flex flex-wrap items-center gap-4 mb-3 text-gray-600 dark:text-gray-400">
                         <div className="flex items-center">
                           <Building2 className="h-4 w-4 mr-1" />
-                          <span>{job.company || 'Company not specified'}</span>
+                          <span>{job.company?.display_name || 'Company not specified'}</span>
                         </div>
-                        {job.location && job.location.length > 0 && (
+                        {job.location?.display_name && (
                           <div className="flex items-center">
                             <MapPin className="h-4 w-4 mr-1" />
-                            <span>{job.location.join(', ')}</span>
+                            <span>{job.location.display_name}</span>
                           </div>
                         )}
                         {(job.salary_min || job.salary_max) && (

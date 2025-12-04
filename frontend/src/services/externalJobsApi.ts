@@ -1,16 +1,14 @@
-import axios from 'axios';
-
-// Adzuna API Configuration
-// Get your free API key from: https://developer.adzuna.com/
-const ADZUNA_APP_ID = import.meta.env.VITE_ADZUNA_APP_ID || '';
-const ADZUNA_APP_KEY = import.meta.env.VITE_ADZUNA_APP_KEY || '';
-const ADZUNA_BASE_URL = '/adzuna';
+import api from './api';
 
 export interface ExternalJob {
   id: string;
   title: string;
-  company: string;
-  location: string[];
+  company: {
+    display_name: string;
+  };
+  location: {
+    display_name: string;
+  };
   description: string;
   salary_min?: number;
   salary_max?: number;
@@ -26,15 +24,13 @@ export interface ExternalJobsResponse {
   count: number;
 }
 
-// Adzuna API Service
+// Adzuna API Service (via Backend Proxy)
 export const externalJobsApi = {
   /**
-   * Search jobs from Adzuna API
+   * Search jobs from Adzuna API via backend proxy
    * @param country - Country code (e.g., 'us', 'gb', 'ca')
    * @param query - Search query (job title, keywords)
    * @param location - Location (city, state, etc.)
-   * @param resultsPerPage - Number of results per page (max 50)
-   * @param page - Page number
    */
   searchJobs: async (
     country: string = 'us',
@@ -43,28 +39,14 @@ export const externalJobsApi = {
     resultsPerPage: number = 20,
     page: number = 1
   ): Promise<ExternalJobsResponse> => {
-    if (!ADZUNA_APP_ID || !ADZUNA_APP_KEY) {
-      throw new Error('Adzuna API credentials not configured. Please add VITE_ADZUNA_APP_ID and VITE_ADZUNA_APP_KEY to your .env file');
-    }
-
     try {
-      const params: Record<string, string | number> = {
-        app_id: ADZUNA_APP_ID,
-        app_key: ADZUNA_APP_KEY,
-        results_per_page: Math.min(resultsPerPage, 50),
-      };
-
-      if (query) {
-        params.what = query;
-      }
-      if (location) {
-        params.where = location;
-      }
-
-      const response = await axios.get<ExternalJobsResponse>(
-        `${ADZUNA_BASE_URL}/${country}/search/${page}`,
-        { params }
-      );
+      const response = await api.get<ExternalJobsResponse>('/external-jobs', {
+        params: {
+          what: query,
+          where: location,
+          country: country
+        }
+      });
 
       return response.data;
     } catch (error: any) {
@@ -74,7 +56,7 @@ export const externalJobsApi = {
   },
 
   /**
-   * Get jobs by category
+   * Get jobs by category (not implemented in backend yet, reusing search)
    */
   getJobsByCategory: async (
     country: string = 'us',
@@ -82,29 +64,9 @@ export const externalJobsApi = {
     resultsPerPage: number = 20,
     page: number = 1
   ): Promise<ExternalJobsResponse> => {
-    if (!ADZUNA_APP_ID || !ADZUNA_APP_KEY) {
-      throw new Error('Adzuna API credentials not configured');
-    }
-
-    try {
-      const response = await axios.get<ExternalJobsResponse>(
-        `${ADZUNA_BASE_URL}/${country}/search/${page}`,
-        {
-          params: {
-            app_id: ADZUNA_APP_ID,
-            app_key: ADZUNA_APP_KEY,
-            category: category,
-            results_per_page: Math.min(resultsPerPage, 50),
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching jobs by category:', error);
-      throw new Error(error.response?.data?.error || 'Failed to fetch jobs by category');
-    }
-  },
+    // Fallback to search since backend doesn't support category specific endpoint yet
+    return externalJobsApi.searchJobs(country, category, '', resultsPerPage, page);
+  }
 };
 
 // Alternative: JSearch API (via RapidAPI) - uncomment if you prefer this
