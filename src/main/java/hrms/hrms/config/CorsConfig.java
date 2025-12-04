@@ -18,10 +18,11 @@ public class CorsConfig {
 
         // ALLOWED ORIGINS (VERY IMPORTANT)
         config.setAllowedOrigins(Arrays.asList(
+                "https://hmrs-six.vercel.app",        // NEW deployment
                 "https://hmrs-fullstack3.vercel.app", // your live frontend
                 "https://hmrs-fullstack2.vercel.app", // previous deployment
-                "http://localhost:5173", // local frontend
-                "http://localhost:5174" // local frontend alternate
+                "http://localhost:5173",              // local frontend
+                "http://localhost:5174"               // local frontend alternate
         ));
 
         // Allowed methods
